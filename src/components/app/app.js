@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
+
+import { startStopwatch, tick, pauseStopwatch, resetStopwatch } from "../../actions/actions";
 
 import "./app.js";
 
-const App = () => {
-
-    const [ss, setSS] = useState(0);
-    const [mm, setMM] = useState(0);
-    const [hh, setHH] = useState(0);
-    const [isRunning, setIsRunning] = useState(false);
-
+const App = props => {
+    const { isRunning, ss, mm, hh, startStopwatch, tick, pauseStopwatch, resetStopwatch } = props;
+    
     let interval;
 
     const formatTime = (value) => {
@@ -18,45 +17,26 @@ const App = () => {
         return value;
     }
 
-    const stopwatch = () => {
-        setSS(ss + 1);
-
-        if(ss >= 59) {
-            setSS(0);
-            setMM(mm + 1);
-        }
-
-        if(mm >= 59) {
-            setMM(0);
-            setHH(hh + 1);
-        }
-    }
-
     useEffect(() => {
         if(isRunning) {
             interval = setInterval(() => {
-                stopwatch();
+                tick();
             }, 1000);
         }
-        
         return () => clearInterval(interval);
-    }, [stopwatch, isRunning]);
+    }, [tick, isRunning]);
 
 
     const start = () => {
-        setIsRunning(true);
+        startStopwatch();
     }
 
     const pause = () => {
-        setIsRunning(false);
-        clearInterval(interval);
+        pauseStopwatch();
     }
 
     const reset = () => {
-        setSS(0);
-        setMM(0);
-        setHH(0);
-        clearInterval(interval);
+        resetStopwatch();
     }
 
     return (
@@ -76,4 +56,13 @@ const App = () => {
     )
 }
 
-export default App;
+const mapStateToProps = state => state;
+
+const mapDispatchToProps = dispatch => ({
+    startStopwatch: () => dispatch(startStopwatch()),
+    tick: () => dispatch(tick()),
+    pauseStopwatch: () => dispatch(pauseStopwatch()),
+    resetStopwatch: () => dispatch(resetStopwatch())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
